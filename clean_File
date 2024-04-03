@@ -1,0 +1,34 @@
+Using the gdown command we'll download the forward and reverse reads from a metagenome from my lab.
+'''
+gdown -O genome_R1.fastq.gz --fuzzy https://drive.google.com/file/d/1oEjh3IzhnacVmvwvJ6vYH_vT2aXlrMZG/edit
+gdown -O genome_R2.fastq.gz --fuzzy https://drive.google.com/file/d/11o24LT-x2L1miJ2pEVkRBRdcOJffoQFg/edit
+'''
+Once we have the files downloaded let's assess the quality of the reads.
+'''
+fastqc genome_R1.fastq.gz
+fastqc genome_R2.fastq.gz
+'''
+
+Perform the Trimming
+'''
+fastp --detect_adapter_for_pe --correction --html Trimming/Metagenome1.fastp.html --json Trimming/Metagenome1.fastp.json --thread 2 --trim_front1 10 --trim_tail1 10 --trim_front2 10 --trim_tail2 10 --cut_right --cut_right_window_size 4 --cut_right_mean_quality 20 -i Metagenome_R1.fastq.gz -I Metagenome_R2.fastq.gz -o Trimming/Metagenome_R1_trimmed.fastq.gz -O Trimming/Metagenome_R2_trimmed.fastq.gz --unpaired1 Trimming/Metagenome_R1_unpaired_trimmed.fastq.gz
+'''
+Let's break this command down a little bit:
+fastp - program name.
+--detect_adapter_for_pe - Detects sequencing adapters from the dataset and then removes them.
+--correction - This will look for sequences where the R1 and R2 overlap and then correct one base in the sequence based on the higher quality base call.
+--json Trimming/Metagenome1.fastp.json - output json file.
+--thread - use parallel processing.
+--trim_front1 - trimming how many bases in front for read1.
+--trim_tail1 - trimming how many bases in tail for read1.
+--trim_front2 - trimming how many bases in front for read2.
+--trim_tail2 - trimming how many bases in tail for read2.
+--cut_right - move a sliding window from front to tail, if meet one window with mean quality < threshold, drop the bases in the window and the right part, and then stop.
+--cut_right_window_size - the window size option of cut_right.
+--cut_right_mean_quality - the mean quality requirement option for cut_right.
+-i - forward read.
+-I - reverse read.
+-o - output for read1.
+-O - output for read2.
+--unpaired1 - output for read1 where a read2 sequence was removed.
+--html Trimming/Metagenome1.fastp.html - Output html file with quality statistics.
